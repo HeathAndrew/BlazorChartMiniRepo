@@ -1,0 +1,548 @@
+﻿@using ApexCharts
+@using BlazorStrap;
+@using MagstimEMGTestApp.Shared
+<div class="MainGrid">
+    <div class="GraphArea">
+        <div class="@(GraphGridClass)">
+            <div class="GraphOneLabelArea vert-align @(GraphOneHidden)">
+                Channel 1:
+            </div>
+            <div class="GraphOneAmpOne vert-align @(GraphOneHidden)">
+                A1: @Amp1Channel1
+            </div>
+            <div class="GraphOneAmpTwo vert-align @(GraphOneHidden)">
+                T1: @returnTimeFromIndex((int)Time1Channel1) ms
+            </div>
+            <div class="GraphOneTimeOne vert-align @(GraphOneHidden)">
+                T2: @returnTimeFromIndex((int)Time2Channel1) ms
+            </div>
+            <div class="GraphOneTimeTwo vert-align @(GraphOneHidden)">
+                ΔT: @returnTimeFromIndex((int)Time2Channel1 - (int)Time1Channel1) ms
+            </div>
+            <div class="GraphOneArea @(GraphOneHidden)">
+                <div style="height:100%;background-color:#0e1117;">
+                    <ApexChart TItem="Data"
+                               Height="@("100%")"
+                               @ref="Chart"
+                               Options="ChartOptionsChannel1"
+                               XAxisType="XAxisType.Numeric">
+                        <ChildContent>
+                            <ApexPointSeries TItem="Data"
+                                             Items="@ChartData"
+                                             SeriesType="SeriesType.Line"
+                                             XValue="@(e => e.xValue)"
+                                             YValue="@(e => (decimal)e.yValue)"
+                                             Stroke="@(new ApexCharts.SeriesStroke {Color = "#00aeef", Width = 1,})" />
+
+                        </ChildContent>
+                    </ApexChart>
+                </div>
+            </div>
+            <div class="GraphTwoLabelArea vert-align @(GraphTwoHidden)">
+                Channel 2:
+            </div>
+            <div class="GraphTwoAmpOne vert-align @(GraphTwoHidden)">
+                A1: @Amp1Channel2
+            </div>
+            <div class="GraphTwoAmpTwo vert-align  @(GraphTwoHidden)">
+                T1: @returnTimeFromIndex((int)Time1Channel2) ms
+            </div>
+            <div class="GraphTwoTimeOne vert-align @(GraphTwoHidden)">
+                T2: @returnTimeFromIndex((int)Time2Channel2) ms
+            </div>
+            <div class="GraphTwoTimeTwo vert-align @(GraphTwoHidden)">
+                ΔT:@returnTimeFromIndex((int)Time2Channel2 - (int)Time1Channel2) ms
+            </div>
+            <div class="GraphTwoArea @(GraphTwoHidden)">
+                <div style="height:100%;background-color:#0e1117;">
+                    <ApexChart TItem="Data"
+                               Height="@("100%")"
+                               @ref="Chart2"
+                               Options="ChartOptionsChannel2"
+                               XAxisType="XAxisType.Numeric">
+                        @*                               <ApexPointTooltip>
+                        <span>
+                        @ChartData2[int.Parse(context.DataPoint.X.ToString())].yValue.ToString()
+                        </span>
+                        </ApexPointTooltip>*@
+                        <ChildContent>
+
+                            <ApexPointSeries TItem="Data"
+                                             Items="@ChartData2"
+                                             SeriesType="SeriesType.Line"
+                                             XValue="@(e => e.xValue)"
+                                             YValue="@(e => (decimal)e.yValue)"
+                                             Stroke="@(new ApexCharts.SeriesStroke {Color = "#00aeef", Width = 1,})" />
+                        </ChildContent>
+                    </ApexChart>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ControlArea">
+        <BSContainer style="padding-top:5%;padding-left:5%;">
+            <BSRow>
+                <div class="menu-bar">
+                    <div class="vr"></div>
+                    <div class="menu-item">
+                        <div class="menu-Label">&nbsp;&nbsp;File</div>
+                        <div class="dropdown-content">
+                            <a href="#" @onclick="()=>ExportData()">Export Data</a>
+                            <a href="#" @onclick="()=>ShowHelpWindow()">Help</a>
+                            <hr />
+                            <a href="#" @onclick="() => ExitApp()">Close</a>
+                        </div>
+                    </div>
+                    <div class="vr"></div>
+                    <div class="menu-item">
+                        <div class="menu-Label">&nbsp;&nbsp;COM Select</div>
+                        <div class="dropdown-content">
+                            @foreach (var port in ports.Select((value, i) => new { i, value }))
+                            {
+
+                                if (selectedPortIndex == port.i)
+                                {
+                                    <a href="#" Class="selected" @onclick="() => SetSelectedPort(port.i)">@port.value</a>
+                                }
+                                if (selectedPortIndex != port.i)
+                                {
+                                    <a href="#" Class="notSelected" @onclick="() => SetSelectedPort(port.i)">@port.value</a>
+                                }
+                            }
+                            @if (ports.Length == 0)
+                            {
+                                <a> No ports found</a>
+                            }
+                            <hr />
+                            <a @onclick="() => RefreshPorts()">refresh</a>
+                        </div>
+                    </div>
+                    <div class="vr"></div>
+                    <div class="menu-item">
+                        <div class="menu-Label">&nbsp;&nbsp;Options</div>
+                        <div class="dropdown-content">
+                            <a href="#" @onclick="()=> ToggleDebugData()">
+                                <div Class="@BS.Form_Check p-1" style="pointer-events:none;">
+                                    <BSInputCheckbox @bind-Value="DebugEnabled" CheckedValue="(bool)true" />
+                                    <BSLabel IsCheckLabel="true">Debug Data</BSLabel>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </BSRow>
+
+            <hr class="w-100" />
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSButton @onclick="GetData" Color="BlazorStrap.BSColor.Primary">Load Data</BSButton>
+            </BSRow>
+            <hr class="w-100" />
+
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Class="text-end vert-align">
+                    Cursor Select
+                </BSCol>
+                <BSCol>
+                    <BSDropdown>
+                        <Toggler><BSToggle IsButton="true" Color="BlazorStrap.BSColor.Primary" style="width:160px;">@SelectedChannel.ToString()</BSToggle></Toggler>
+                        <Content>
+                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.None)">None</BSDropdownItem>
+                            <BSDropdownItem IsDivider="true" />
+                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Amp1Channel1)">Amp 1 Channel 1</BSDropdownItem>
+
+                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Time1Channel1)">Time 1 Channel 1</BSDropdownItem>
+                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Time2Channel1)">Time 2 Channel 1</BSDropdownItem>
+                            <BSDropdownItem IsDivider="true" />
+                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Amp1Channel2)">Amp 1 Channel 2</BSDropdownItem>
+
+                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Time1Channel2)">Time 1 Channel 2</BSDropdownItem>
+                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Time2Channel2)">Time 2 Channel 2</BSDropdownItem>
+                        </Content>
+                    </BSDropdown>
+                </BSCol>
+            </BSRow>
+            <hr class="w-100" />
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                Cursor Adjust
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Column="2">
+                    <BSButton Color="BlazorStrap.BSColor.Warning" @onclick="() => CursorAdjust(-100)">---</BSButton>
+                </BSCol>
+                <BSCol Column="2">
+                    <BSButton Color="BlazorStrap.BSColor.Warning" @onclick="() => CursorAdjust(-10)">--</BSButton>
+                </BSCol>
+                <BSCol Column="2">
+                    <BSButton Color="BlazorStrap.BSColor.Warning" @onclick="() => CursorAdjust(-1)">-</BSButton>
+                </BSCol>
+                <BSCol Column="2">
+                    <BSButton Color="BlazorStrap.BSColor.Success" @onclick="() => CursorAdjust(1)">+</BSButton>
+                </BSCol>
+                <BSCol Column="2">
+                    <BSButton Color="BlazorStrap.BSColor.Success" @onclick="() => CursorAdjust(10)">++</BSButton>
+                </BSCol>
+                <BSCol Column="2">
+                    <BSButton Color="BlazorStrap.BSColor.Success" @onclick="() => CursorAdjust(100)">+++</BSButton>
+                </BSCol>
+            </BSRow>
+            <hr class="w-100" />
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Class="text-end vert-align">
+                    Graph Display
+                </BSCol>
+                <BSCol>
+                    <BSDropdown>
+                        <Toggler><BSToggle IsButton="true" Color="BlazorStrap.BSColor.Primary">@SelectedGraphDisplay.ToString()</BSToggle></Toggler>
+                        <Content>
+                            <BSDropdownItem @onclick="() => SetSelectedDisplay(GraphDisplay.Both)">Both</BSDropdownItem>
+                            <BSDropdownItem IsDivider="true" />
+                            <BSDropdownItem @onclick="() => SetSelectedDisplay(GraphDisplay.ChannelOne)">Channel 1</BSDropdownItem>
+                            <BSDropdownItem @onclick="() => SetSelectedDisplay(GraphDisplay.ChannelTwo)">Channel 2</BSDropdownItem>
+                        </Content>
+                    </BSDropdown>
+                </BSCol>
+            </BSRow>
+            <hr class="w-100" />
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                Rms Region Channel 1:
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Class="text-end">
+                    RMS Channel 1 =&nbsp;
+                </BSCol>
+                <BSCol>
+                    @RMSChannel1
+                </BSCol>
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Column="6" Class="text-end vert-align">
+                    <label>UpperBound</label>
+                </BSCol>
+                <BSCol Column="6">
+                    <BSInput InputType="BlazorStrap.InputType.Text" @bind-Value="Channel1UpperBound" Class="m-1 w-75" />
+                </BSCol>
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None">
+                <BSCol Column="6" Class="text-end vert-align">
+                    <label>LowerBound</label>
+                </BSCol>
+                <BSCol Column="6">
+                    <BSInput InputType="BlazorStrap.InputType.Text" @bind-Value="Channel1LowerBound" Class="m-1 w-75" />
+                </BSCol>
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Class="text-end">
+                    RMS Channel 1 Bounded =&nbsp;
+                </BSCol>
+                <BSCol>
+                    @RMSChannel1Bounded
+                </BSCol>
+            </BSRow>
+            <hr class="w-100" />
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                Rms Region Channel 2:
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Class="text-end">
+                    RMS Channel 2 =&nbsp;
+                </BSCol>
+                <BSCol>
+                    @RMSChannel2
+                </BSCol>
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Column="6" Class="text-end vert-align">
+                    <label>UpperBound</label>
+                </BSCol>
+                <BSCol Column="6">
+                    <BSInput InputType="BlazorStrap.InputType.Text" @bind-Value="Channel2UpperBound" Class="m-1 w-75" />
+                </BSCol>
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None">
+                <BSCol Column="6" Class="text-end vert-align">
+                    <label> LowerBound</label>
+                </BSCol>
+                <BSCol Column="6">
+                    <BSInput InputType="BlazorStrap.InputType.Text" @bind-Value="Channel2LowerBound" Class="m-1 w-75" />
+                </BSCol>
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Class="text-end">
+                    RMS Channel 2 Bounded =&nbsp;
+                </BSCol>
+                <BSCol>
+                    @RMSChannel2Bounded
+                </BSCol>
+            </BSRow>
+            <hr class="w-100" />
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Class="text-end">
+                    MentaLab Software Version :&nbsp;
+                </BSCol>
+                <BSCol>
+                    @MentalabVersion
+                </BSCol>
+            </BSRow>
+            <BSRow Gutters="BlazorStrap.Gutters.None" Class="ControlRow">
+                <BSCol Class="text-end">
+                    Selected Com Port :&nbsp;
+                </BSCol>
+                <BSCol>
+                    @GetCurrentSelectedComPort()
+                </BSCol>
+            </BSRow>
+        </BSContainer>
+    </div>
+</div>
+<BSModal DataId="modal1" @ref="modal1">
+    <Header>6433-08 Magstim EMG test App</Header>
+    <Content>
+        <h6>COM Ports</h6>
+        <hr />
+        Select a COM port using the COM select option.
+        <br />If the mentalab device isnt found the version number will look like @(modalMsg) or similar.
+        <br />Load data when port selected.
+        <br />
+        <br />
+        <h6>Cursors</h6>
+        <hr />
+        Select a cursor with the cursor select area and adjust with the yellow and green buttons.
+        <br />
+        <br />
+        <h6>RMS</h6>
+        <hr />
+        The rms channel will calculate the rms between the time cursors.
+        <br />The bounded value will calculate between the supplied values and be displayed seperatley.
+        <br />
+        <hr />
+        Export is located under File.
+        <hr />
+        To close the application use the option under file or press the X button
+        <hr />
+        Any issues contact Andrew
+
+    </Content>
+    <Footer Context="modal">
+        <BSButton MarginStart="Margins.Auto" Color="BSColor.Secondary" @onclick="modal.HideAsync">Close</BSButton>
+    </Footer>
+</BSModal>
+<style>
+    /* Style for the menu bar container */
+    .menu-bar {
+        display: flex;
+        background-color: #2f2f2f; /* Menu bar background color */
+        padding: 10px;
+    }
+
+    /* Style for individual menu items (dropdowns) */
+    .menu-item {
+        position: relative;
+        margin-right: 15px; /* Spacing between menu items */
+    }
+
+    .menu-Label {
+    }
+    /* Style for the dropdown content */
+    .menu-item .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9; /* Dropdown background color */
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+    /* Style for the menu item on hover */
+    .menu-item:hover .dropdown-content {
+        display: block;
+    }
+
+    /* Style for dropdown items (links) */
+    .menu-item .dropdown-content a {
+        display: block;
+        padding: 10px;
+        margin: 0px 20px;
+        text-decoration: none;
+        color: #333; /* Text color for dropdown items */
+    }
+
+        /* Style for dropdown items on hover */
+        .menu-item .dropdown-content a:hover {
+            background-color: #ddd; /* Background color on hover */
+            padding: 10px;
+            margin: 0px 20px;
+        }
+
+
+    body {
+        background-color: #2f2f2f;
+        color: white;
+        height: 98vh;
+    }
+
+    #app {
+        height: 100%;
+    }
+
+    .MainGrid {
+        display: grid;
+        grid-template-columns: 75% 25%;
+        grid-template-rows: 1fr;
+        grid-auto-columns: 1fr;
+        gap: 0px 1px;
+        grid-auto-flow: row;
+        grid-template-areas:
+            "GraphArea ControlArea";
+        height: 100%;
+        width: 98vw;
+    }
+
+    .GraphArea {
+        grid-area: GraphArea;
+        height: 100%;
+    }
+
+    .ControlArea {
+        grid-area: ControlArea;
+    }
+
+    .GraphGrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: 5% 45% 5% 45%;
+        grid-auto-columns: 1fr;
+        gap: 0px 1px;
+        grid-auto-flow: row;
+        grid-template-areas:
+            "GraphOneLabelArea GraphOneAmpOne GraphOneAmpTwo GraphOneTimeOne GraphOneTimeTwo"
+            "GraphOneArea GraphOneArea GraphOneArea GraphOneArea GraphOneArea"
+            "GraphTwoLabelArea GraphTwoAmpOne GraphTwoAmpTwo GraphTwoTimeOne GraphTwoTimeTwo"
+            "GraphTwoArea GraphTwoArea GraphTwoArea GraphTwoArea GraphTwoArea";
+        height: 100%;
+    }
+    .GraphGridOne {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: 5% 95% 0% 0%;
+        grid-auto-columns: 1fr;
+        gap: 0px 1px;
+        grid-auto-flow: row;
+        grid-template-areas:
+            "GraphOneLabelArea GraphOneAmpOne GraphOneAmpTwo GraphOneTimeOne GraphOneTimeTwo"
+            "GraphOneArea GraphOneArea GraphOneArea GraphOneArea GraphOneArea"
+            "GraphTwoLabelArea GraphTwoAmpOne GraphTwoAmpTwo GraphTwoTimeOne GraphTwoTimeTwo"
+            "GraphTwoArea GraphTwoArea GraphTwoArea GraphTwoArea GraphTwoArea";
+        height: 100%;
+    }
+        .GraphGridTwo {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: 0% 0% 5% 95%;
+        grid-auto-columns: 1fr;
+        gap: 0px 1px;
+        grid-auto-flow: row;
+        grid-template-areas:
+            "GraphOneLabelArea GraphOneAmpOne GraphOneAmpTwo GraphOneTimeOne GraphOneTimeTwo"
+            "GraphOneArea GraphOneArea GraphOneArea GraphOneArea GraphOneArea"
+            "GraphTwoLabelArea GraphTwoAmpOne GraphTwoAmpTwo GraphTwoTimeOne GraphTwoTimeTwo"
+            "GraphTwoArea GraphTwoArea GraphTwoArea GraphTwoArea GraphTwoArea";
+        height: 100%;
+    }
+
+    .vert-align {
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .GraphOneArea {
+        grid-area: GraphOneArea;
+        border: 1px solid #ffffff;
+    }
+
+    .GraphTwoArea {
+        grid-area: GraphTwoArea;
+        border: 1px solid #ffffff;
+    }
+
+    .GraphOneLabelArea {
+        grid-area: GraphOneLabelArea;
+        overflow: hidden;
+    }
+
+    .GraphTwoLabelArea {
+        grid-area: GraphTwoLabelArea;
+        overflow: hidden;
+    }
+
+    .GraphOneAmpOne {
+        grid-area: GraphOneAmpOne;
+        overflow: hidden;
+    }
+
+    .GraphOneAmpTwo {
+        grid-area: GraphOneAmpTwo;
+        overflow: hidden;
+    }
+
+    .GraphOneTimeOne {
+        grid-area: GraphOneTimeOne;
+        overflow: hidden;
+    }
+
+    .GraphOneTimeTwo {
+        grid-area: GraphOneTimeTwo;
+        overflow: hidden;
+    }
+
+    .GraphTwoAmpOne {
+        grid-area: GraphTwoAmpOne;
+        overflow: hidden;
+    }
+
+    .GraphTwoAmpTwo {
+        grid-area: GraphTwoAmpTwo;
+        overflow: hidden;
+    }
+
+    .GraphTwoTimeOne {
+        grid-area: GraphTwoTimeOne;
+        overflow: hidden;
+    }
+
+    .GraphTwoTimeTwo {
+        grid-area: GraphTwoTimeTwo;
+        overflow: hidden;
+    }
+
+    .ControlRow {
+        padding-top: 2%;
+    }
+
+    .selected {
+        background-color: #b7bfc7;
+        color: #1e2125;
+    }
+
+        .selected:hover {
+            background-color: #b7bfc7;
+            color: #1e2125;
+        }
+
+    .notSelected {
+        background-color: #e9ecef;
+        color: #1e2125;
+    }
+
+        .notSelected:hover {
+            background-color: #e9ecef;
+            color: #1e2125;
+        }
+
+    .Hidden {
+        display: none;
+    }
+
+</style>
