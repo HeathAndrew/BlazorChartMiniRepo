@@ -47,13 +47,14 @@ namespace BlazorTestApp
         public float Time2Channel1 { get => _time2Channel1; set { _time2Channel1 = value; if (value < Time1Channel1) { Time1Channel1--; } InvokeAsync(() => { StateHasChanged(); }); }}
        
         AnnotationsYAxis ZeroLineChartOne = new AnnotationsYAxis { Id = "ZeroLine", StrokeDashArray = 0, Y = 0, BorderColor = "#ffffff", Label = new ApexCharts.Label { Text = " " } };
+        //lifecycle event
         protected override async Task OnInitializedAsync()
         {
             ChartOptionsChannel1 = ReturnChartOptions("1");
             await base.OnInitializedAsync();
         }
 
-
+        //Renders the chart and initial annotations
         public async Task RenderChart()
         {
             if (Chart is not null)
@@ -65,6 +66,7 @@ namespace BlazorTestApp
                 await InitCursorsYCursors();
             }
         }
+        //inital drawing of cursors for Y Axis
         public async Task InitCursorsYCursors()
         {
             if (ChartData.Count != 0 && Chart is not null)
@@ -78,6 +80,7 @@ namespace BlazorTestApp
                 InitCache(DrawingCacheAmp, newID);
             }
         }
+        //Initial drawing of cursors on X Axis
         public async Task InitCursorsXCursors()
         {
             if (ChartData.Count != 0 && Chart is not null)
@@ -97,6 +100,7 @@ namespace BlazorTestApp
 
             }
         }
+        //the drawing loop for all cursors, will draw the new cursor and remove the old one (in that order)
         public async Task CursorAdjust(int AdjustAmount)
         {
             if (Chart is not null)
@@ -150,19 +154,23 @@ namespace BlazorTestApp
                 }
             }
         }
+        //"cache" initialzer 
         public void InitCache(string[] cache, string newValue)
         {
             cache[0] = newValue;
         }
+        //"Cache" updater
         public void UpdateCache(string[] cache, string newValue)
         {
             cache[1] = cache[0];
             cache[0] = newValue;
         }
+        //sets the selected "Channel"
         void SetSelectedChannel(Channels Channel)
         {
             SelectedChannel = Channel;
         }
+        //populates the graph with data
         public void GetData()
         {
 
@@ -170,6 +178,7 @@ namespace BlazorTestApp
             Task.Run(async () => await RenderChart());
             StateHasChanged();
         }
+        //Helper function to reduce code duplication
         public ApexChartOptions<Data> ReturnChartOptions(string ID)
         {
             ApexChartOptions<Data> apexChartOptions = new ApexChartOptions<Data>();
@@ -216,6 +225,7 @@ namespace BlazorTestApp
             });
             return apexChartOptions;
         }
+        //Helper function to reduce code duplication
         public AnnotationsXAxis NewAnnotationXAxis(string ID, int Index, string Label)
         {
             return new AnnotationsXAxis
@@ -235,6 +245,7 @@ namespace BlazorTestApp
                 }
             };
         }
+        //Helper function to reduce code duplication
         public AnnotationsYAxis NewAnnotationYAxis(String ID, double Index, string Label)
         {
             return new AnnotationsYAxis
