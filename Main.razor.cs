@@ -19,31 +19,19 @@ namespace BlazorTestApp
 {
     public partial class Main
     {
-        AnnotationsXAxis Annotation;
+
         private ApexChart<Data>? Chart { get; set; }
 
-        private List<Data> _ChartData = new();
-        GraphDisplay SelectedGraphDisplay = GraphDisplay.Both;
         Channels SelectedChannel = Channels.None;
 
         private float _amp1Channel1;
         private float _time1Channel1;
         private float _time2Channel1;
 
-        bool DebugEnabled = true;
+        AnnotationsYAxis? Amp1Channel1Annotation;
 
-
-
-        private string[] ports = Array.Empty<string>();
-        
-        AnnotationsYAxis Amp1Channel1Annotation;
-
-        AnnotationsXAxis Time1Channel1Annotation;
-        AnnotationsXAxis Time2Channel1Annotation;
-
-
-
-        bool zeroAtStart = true;
+        AnnotationsXAxis? Time1Channel1Annotation;
+        AnnotationsXAxis? Time2Channel1Annotation;
         public float RMSChannel1Bounded { get; set; }
         public float RMSChannel1 { get; set; }
         public float RMSChannel2Bounded { get; set; }
@@ -52,8 +40,8 @@ namespace BlazorTestApp
         private ApexChartOptions<Data> ChartOptionsChannel1 { get; set; } = new();
         private ApexChartOptions<Data> ChartOptionsChannel2 { get; set; } = new();
 
-        public List<double> AmpOrderedData { get; set; }
-        public List<double> Amp2OrderedData { get; set; }
+        public List<double>? AmpOrderedData { get; set; }
+        public List<double>? Amp2OrderedData { get; set; }
 
         SineWaveDataGenerator generator = new SineWaveDataGenerator();
         public float Amp1Channel1 { get => _amp1Channel1; set { _amp1Channel1 = value; InvokeAsync(() => { StateHasChanged(); }); } }
@@ -81,7 +69,7 @@ namespace BlazorTestApp
 
 
 
-        public List<Data> ChartData { get => _ChartData; set { _ChartData = value; } }
+        public List<Data> ChartData { get; set; } = new();
         int IndexOfAmp1Channel1;
 
 
@@ -97,30 +85,11 @@ namespace BlazorTestApp
                 Text = " "
             }
         };
-        AnnotationsYAxis ZeroLineChartTwo = new AnnotationsYAxis
-        {
-            Id = "ZeroLine",
-            StrokeDashArray = 0,
-            Y = 0,
-            BorderColor = "#ffffff",
-            Label = new ApexCharts.Label
-            {
-                Text = " "
-            }
-        };
-        private string _C1Upper;
-        private string _C1Lower;
-        private string _C2Upper;
-        private string _C2Lower;
-        private int selectedPortIndex = -1;
         protected override async Task OnInitializedAsync()
         {
             ChartOptionsChannel1 = ReturnChartOptions("1");
-            ChartOptionsChannel2 = ReturnChartOptions("2");
             await base.OnInitializedAsync();
         }
-        string GraphGridClass = "GraphGrid";
-
 
         void SetSelectedChannel(Channels Channel)
         {
@@ -135,51 +104,47 @@ namespace BlazorTestApp
         }
         public async Task RenderChart()
         {
-            await Chart.RenderAsync();
-            await Chart.AddYAxisAnnotationAsync(ZeroLineChartOne, true);
+            if (Chart is not null)
+            {
+                await Chart.RenderAsync();
+                await Chart.AddYAxisAnnotationAsync(ZeroLineChartOne, true);
 
 
-            await Chart.UpdateSeriesAsync();
-            await InitCursorsXCursors();
-            await InitCursorsYCursors();
-        }
-        public double returnTimeFromIndex(int index)
-        {
-            //add option to add 100 to simulate starting when pulse is fired
-            var value = index++ * 300d / 2400;
-            if (!zeroAtStart) value += 100;
-            return value;
+                await Chart.UpdateSeriesAsync();
+                await InitCursorsXCursors();
+                await InitCursorsYCursors();
+            }
         }
         public async Task InitCursorsYCursors()
         {
-            if (ChartData.Count != 0)
+            if (ChartData.Count != 0 && Chart is not null)
             {
                 AmpOrderedData = (from v in ChartData orderby v.yValue descending select v.yValue).ToList();
- 
+
 
                 IndexOfAmp1Channel1 = 0;
 
-      
+
 
 
                 Amp1Channel1 = (float)Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 5, MidpointRounding.AwayFromZero);
 
-              
+
 
                 Amp1Channel1Annotation = NewAnnotationYAxis("Channel1Amp1", Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 2, MidpointRounding.AwayFromZero), "Amp 1");
 
 
-               
+
 
                 await Chart.AddYAxisAnnotationAsync(Amp1Channel1Annotation, false);
 
-             
+
 
             }
         }
         public async Task InitCursorsXCursors()
         {
-            if (ChartData.Count != 0)
+            if (ChartData.Count != 0 && Chart is not null)
             {
                 int startIndex = 800;
                 int endIndex = (ChartData.Count / 4) * 3;
@@ -198,53 +163,40 @@ namespace BlazorTestApp
         }
         public async Task CursorAdjust(int AdjustAmount)
         {
-            switch (SelectedChannel)
+            if (Chart is not null)
             {
-                case Channels.None: break;
-                case Channels.Time1Channel1:
-                    await Chart.RemoveAnnotationAsync("Channel1Time1");
-                    await Chart.RemoveAnnotationAsync("Channel1Time2");
-
-                    Time1Channel1 += AdjustAmount;
-                    Time1Channel1 = Math.Clamp(Time1Channel1, 0, ChartData.Count - 1);
-                    Time1Channel1Annotation = NewAnnotationXAxis("Channel1Time1", (int)Time1Channel1, "T1");
-                    Time2Channel1Annotation = NewAnnotationXAxis("Channel1Time2", (int)Time2Channel1, "T2");
-
-                    await Chart.AddXAxisAnnotationAsync(Time1Channel1Annotation, false);
-                    await Chart.AddXAxisAnnotationAsync(Time2Channel1Annotation, false);
-
-                    break;
-                case Channels.Time2Channel1:
-                    await Chart.RemoveAnnotationAsync("Channel1Time1");
-                    await Chart.RemoveAnnotationAsync("Channel1Time2");
-
-                    Time2Channel1 += AdjustAmount;
-                    Time2Channel1 = Math.Clamp(Time2Channel1, 0, ChartData.Count - 1);
-                    Time1Channel1Annotation = NewAnnotationXAxis("Channel1Time1", (int)Time1Channel1, "T1");
-                    Time2Channel1Annotation = NewAnnotationXAxis("Channel1Time2", (int)Time2Channel1, "T2");
-
-                    await Chart.AddXAxisAnnotationAsync(Time1Channel1Annotation, false);
-                    await Chart.AddXAxisAnnotationAsync(Time2Channel1Annotation, false);
-                    break;
-                case Channels.Time1Channel2:
-                    break;
-                case Channels.Time2Channel2:
-                    break;
-                case Channels.Amp1Channel1:
-                    await Chart.RemoveAnnotationAsync("Channel1Amp1");
-                    IndexOfAmp1Channel1 += AdjustAmount;
-                    IndexOfAmp1Channel1 = Math.Clamp(IndexOfAmp1Channel1, 0, ChartData.Count - 1);
-                    Amp1Channel1 = (float)Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 5, MidpointRounding.AwayFromZero);
-                    Amp1Channel1Annotation = NewAnnotationYAxis("Channel1Amp1", Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 2, MidpointRounding.AwayFromZero), "Amp 1");
-                    await Chart.AddYAxisAnnotationAsync(Amp1Channel1Annotation, false);
-                    break;
-                case Channels.Amp2Channel1:
-                    break;
-                case Channels.Amp1Channel2:
-                    break;
-                case Channels.Amp2Channel2:
-                    break;
-
+                switch (SelectedChannel)
+                {
+                    case Channels.None: break;
+                    case Channels.Time1Channel1:
+                        await Chart.RemoveAnnotationAsync("Channel1Time1");
+                        await Chart.RemoveAnnotationAsync("Channel1Time2");
+                        Time1Channel1 += AdjustAmount;
+                        Time1Channel1 = Math.Clamp(Time1Channel1, 0, ChartData.Count - 1);
+                        Time1Channel1Annotation = NewAnnotationXAxis("Channel1Time1", (int)Time1Channel1, "T1");
+                        Time2Channel1Annotation = NewAnnotationXAxis("Channel1Time2", (int)Time2Channel1, "T2");
+                        await Chart.AddXAxisAnnotationAsync(Time1Channel1Annotation, false);
+                        await Chart.AddXAxisAnnotationAsync(Time2Channel1Annotation, false);
+                        break;
+                    case Channels.Time2Channel1:
+                        await Chart.RemoveAnnotationAsync("Channel1Time1");
+                        await Chart.RemoveAnnotationAsync("Channel1Time2");
+                        Time2Channel1 += AdjustAmount;
+                        Time2Channel1 = Math.Clamp(Time2Channel1, 0, ChartData.Count - 1);
+                        Time1Channel1Annotation = NewAnnotationXAxis("Channel1Time1", (int)Time1Channel1, "T1");
+                        Time2Channel1Annotation = NewAnnotationXAxis("Channel1Time2", (int)Time2Channel1, "T2");
+                        await Chart.AddXAxisAnnotationAsync(Time1Channel1Annotation, false);
+                        await Chart.AddXAxisAnnotationAsync(Time2Channel1Annotation, false);
+                        break;
+                    case Channels.Amp1Channel1:
+                        await Chart.RemoveAnnotationAsync("Channel1Amp1");
+                        IndexOfAmp1Channel1 += AdjustAmount;
+                        IndexOfAmp1Channel1 = Math.Clamp(IndexOfAmp1Channel1, 0, ChartData.Count - 1);
+                        Amp1Channel1 = (float)Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 5, MidpointRounding.AwayFromZero);
+                        Amp1Channel1Annotation = NewAnnotationYAxis("Channel1Amp1", Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 2, MidpointRounding.AwayFromZero), "Amp 1");
+                        await Chart.AddYAxisAnnotationAsync(Amp1Channel1Annotation, false);
+                        break;
+                }
             }
         }
         public ApexChartOptions<Data> ReturnChartOptions(string ID)
@@ -292,7 +244,6 @@ namespace BlazorTestApp
                 DecimalsInFloat = 10
             });
             return apexChartOptions;
-
         }
         public AnnotationsXAxis NewAnnotationXAxis(string ID, int Index, string Label)
         {
@@ -326,49 +277,6 @@ namespace BlazorTestApp
                     Text = Label
                 }
             };
-        }
-        public void ExitApp()
-        {
-            System.Windows.Application.Current.Shutdown();
-        }
-        public void ExportData()
-        {
-            var exportlocation = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            try
-            {
-                WriteToCsv(ChartData, exportlocation + @"\" + DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + "_EMGDataExportChannel1.csv");
-                
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-        static void WriteToCsv(List<Data> Data, string filePath)
-        {
-            using (var writer = new StreamWriter(filePath))
-            using (var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture)))
-            {
-                csv.WriteRecords(Data);
-            }
-        }
-        public string GetCurrentSelectedComPort()
-        {
-            if (selectedPortIndex == -1)
-            {
-                return "none";
-            }
-            if (selectedPortIndex >= 0)
-            {
-                return ports[selectedPortIndex];
-            }
-            return "unknown";
-        }
-        BSModal? modal1 = new();
-        string modalMsg = "\0\0\0\0\0";
-        private void ShowHelpWindow()
-        {
-            modal1.ShowAsync();
         }
     }
 }

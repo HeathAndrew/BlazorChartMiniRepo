@@ -3,7 +3,7 @@
 @using BlazorTestApp.Shared
 <div class="MainGrid">
     <div class="GraphArea">
-        <div class="@(GraphGridClass)">
+        <div class="GraphGrid">
             <div class="GraphOneArea">
                 <div style="height:100%;background-color:#0e1117;">
                     <ApexChart TItem="Data"
@@ -47,11 +47,6 @@
 
                             <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Time1Channel1)">Time 1 Channel 1</BSDropdownItem>
                             <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Time2Channel1)">Time 2 Channel 1</BSDropdownItem>
-                            <BSDropdownItem IsDivider="true" />
-                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Amp1Channel2)">Amp 1 Channel 2</BSDropdownItem>
-
-                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Time1Channel2)">Time 1 Channel 2</BSDropdownItem>
-                            <BSDropdownItem @onclick="() => SetSelectedChannel(Channels.Time2Channel2)">Time 2 Channel 2</BSDropdownItem>
                         </Content>
                     </BSDropdown>
                 </BSCol>
@@ -83,38 +78,6 @@
         </BSContainer>
     </div>
 </div>
-<BSModal DataId="modal1" @ref="modal1">
-    <Header>6433-08 Magstim EMG test App</Header>
-    <Content>
-        <h6>COM Ports</h6>
-        <hr />
-        Select a COM port using the COM select option.
-        <br />If the mentalab device isnt found the version number will look like @(modalMsg) or similar.
-        <br />Load data when port selected.
-        <br />
-        <br />
-        <h6>Cursors</h6>
-        <hr />
-        Select a cursor with the cursor select area and adjust with the yellow and green buttons.
-        <br />
-        <br />
-        <h6>RMS</h6>
-        <hr />
-        The rms channel will calculate the rms between the time cursors.
-        <br />The bounded value will calculate between the supplied values and be displayed seperatley.
-        <br />
-        <hr />
-        Export is located under File.
-        <hr />
-        To close the application use the option under file or press the X button
-        <hr />
-        Any issues contact Andrew
-
-    </Content>
-    <Footer Context="modal">
-        <BSButton MarginStart="Margins.Auto" Color="BSColor.Secondary" @onclick="modal.HideAsync">Close</BSButton>
-    </Footer>
-</BSModal>
 <style>
     body {
         background-color: #2f2f2f;

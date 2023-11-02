@@ -8,7 +8,7 @@ namespace BlazorTestApp.Shared
 {
     public class SineWaveDataGenerator
     {
-        private Random random = new Random();
+        private readonly Random random = new Random();
 
         public List<Data> GenerateEMGSignal(int numSamples, float duration, float muscleActivationLevel = 1f, float noiseAmplitude = 1.5f)
         {
