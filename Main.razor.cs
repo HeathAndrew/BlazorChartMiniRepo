@@ -19,97 +19,47 @@ namespace BlazorTestApp
 {
     public partial class Main
     {
-
-        private ApexChart<Data>? Chart { get; set; }
+        ApexChart<Data>? Chart { get; set; }
+        float _amp1Channel1;
+        float _time1Channel1;
+        float _time2Channel1;
 
         Channels SelectedChannel = Channels.None;
+        int IndexOfAmp1Channel1;
+        Random rand = new Random();
+        string AnnoIDAmp = "Amp";
+        string AnnoIDTime1 = "Time1";
+        string AnnoIDTime2 = "Time2";
 
-        private float _amp1Channel1;
-        private float _time1Channel1;
-        private float _time2Channel1;
-
+        string[] DrawingCacheAmp = new string[2];
+        string[] DrawingCacheTime2 = new string[2];
+        string[] DrawingCacheTime1 = new string[2];
         AnnotationsYAxis? Amp1Channel1Annotation;
-
         AnnotationsXAxis? Time1Channel1Annotation;
         AnnotationsXAxis? Time2Channel1Annotation;
-        public float RMSChannel1Bounded { get; set; }
-        public float RMSChannel1 { get; set; }
-        public float RMSChannel2Bounded { get; set; }
-        public float RMSChannel2 { get; set; }
-
-        private ApexChartOptions<Data> ChartOptionsChannel1 { get; set; } = new();
-        private ApexChartOptions<Data> ChartOptionsChannel2 { get; set; } = new();
-
-        public List<double>? AmpOrderedData { get; set; }
-        public List<double>? Amp2OrderedData { get; set; }
+        List<Data> ChartData { get; set; } = new();
+        ApexChartOptions<Data> ChartOptionsChannel1 { get; set; } = new();
+        List<double>? AmpOrderedData { get; set; }
 
         SineWaveDataGenerator generator = new SineWaveDataGenerator();
         public float Amp1Channel1 { get => _amp1Channel1; set { _amp1Channel1 = value; InvokeAsync(() => { StateHasChanged(); }); } }
-        public float Time1Channel1
-        {
-            get => _time1Channel1;
-            set
-            {
-                _time1Channel1 = value;
-                if (value > Time2Channel1) Time2Channel1++;
-                InvokeAsync(() => { StateHasChanged(); });
-            }
-        }
-        public float Time2Channel1
-        {
-            get => _time2Channel1;
-            set
-            {
-                _time2Channel1 = value;
-                if (value < Time1Channel1) Time1Channel1--;
-
-                InvokeAsync(() => { StateHasChanged(); });
-            }
-        }
-
-
-
-        public List<Data> ChartData { get; set; } = new();
-        int IndexOfAmp1Channel1;
-
-
-
-        AnnotationsYAxis ZeroLineChartOne = new AnnotationsYAxis
-        {
-            Id = "ZeroLine",
-            StrokeDashArray = 0,
-            Y = 0,
-            BorderColor = "#ffffff",
-            Label = new ApexCharts.Label
-            {
-                Text = " "
-            }
-        };
+        public float Time1Channel1 { get => _time1Channel1; set { _time1Channel1 = value; if (value > Time2Channel1) { Time2Channel1++; } InvokeAsync(() => { StateHasChanged(); }); }}
+        public float Time2Channel1 { get => _time2Channel1; set { _time2Channel1 = value; if (value < Time1Channel1) { Time1Channel1--; } InvokeAsync(() => { StateHasChanged(); }); }}
+       
+        AnnotationsYAxis ZeroLineChartOne = new AnnotationsYAxis { Id = "ZeroLine", StrokeDashArray = 0, Y = 0, BorderColor = "#ffffff", Label = new ApexCharts.Label { Text = " " } };
         protected override async Task OnInitializedAsync()
         {
             ChartOptionsChannel1 = ReturnChartOptions("1");
             await base.OnInitializedAsync();
         }
 
-        void SetSelectedChannel(Channels Channel)
-        {
-            SelectedChannel = Channel;
-        }
-        public void GetData()
-        {
 
-            ChartData = generator.GenerateEMGSignal(2400, 1f);
-            Task.Run(async () => await RenderChart());
-            StateHasChanged();
-        }
         public async Task RenderChart()
         {
             if (Chart is not null)
             {
                 await Chart.RenderAsync();
                 await Chart.AddYAxisAnnotationAsync(ZeroLineChartOne, true);
-
-
                 await Chart.UpdateSeriesAsync();
                 await InitCursorsXCursors();
                 await InitCursorsYCursors();
@@ -147,15 +97,6 @@ namespace BlazorTestApp
 
             }
         }
-
-        string AnnoIDAmp = "Amp";
-        string AnnoIDTime1 = "Time1";
-        string AnnoIDTime2 = "Time2";
-
-        Random rand = new Random();
-        string[] DrawingCacheAmp = new string[2];
-        string[] DrawingCacheTime2 = new string[2];
-        string[] DrawingCacheTime1 = new string[2];
         public async Task CursorAdjust(int AdjustAmount)
         {
             if (Chart is not null)
@@ -217,6 +158,17 @@ namespace BlazorTestApp
         {
             cache[1] = cache[0];
             cache[0] = newValue;
+        }
+        void SetSelectedChannel(Channels Channel)
+        {
+            SelectedChannel = Channel;
+        }
+        public void GetData()
+        {
+
+            ChartData = generator.GenerateEMGSignal(2400, 1f);
+            Task.Run(async () => await RenderChart());
+            StateHasChanged();
         }
         public ApexChartOptions<Data> ReturnChartOptions(string ID)
         {
