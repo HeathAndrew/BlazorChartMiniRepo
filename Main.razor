@@ -1,6 +1,6 @@
 ﻿@using ApexCharts
 @using BlazorStrap;
-@using MagstimEMGTestApp.Shared
+@using BlazorTestApp.Shared
 <div class="MainGrid">
     <div class="GraphArea">
         <div class="@(GraphGridClass)">
@@ -94,30 +94,7 @@
                         </div>
                     </div>
                     <div class="vr"></div>
-                    <div class="menu-item">
-                        <div class="menu-Label">&nbsp;&nbsp;COM Select</div>
-                        <div class="dropdown-content">
-                            @foreach (var port in ports.Select((value, i) => new { i, value }))
-                            {
 
-                                if (selectedPortIndex == port.i)
-                                {
-                                    <a href="#" Class="selected" @onclick="() => SetSelectedPort(port.i)">@port.value</a>
-                                }
-                                if (selectedPortIndex != port.i)
-                                {
-                                    <a href="#" Class="notSelected" @onclick="() => SetSelectedPort(port.i)">@port.value</a>
-                                }
-                            }
-                            @if (ports.Length == 0)
-                            {
-                                <a> No ports found</a>
-                            }
-                            <hr />
-                            <a @onclick="() => RefreshPorts()">refresh</a>
-                        </div>
-                    </div>
-                    <div class="vr"></div>
                     <div class="menu-item">
                         <div class="menu-Label">&nbsp;&nbsp;Options</div>
                         <div class="dropdown-content">

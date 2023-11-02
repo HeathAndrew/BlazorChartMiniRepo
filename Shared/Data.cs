@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MagstimEMGTestApp.Shared
+namespace BlazorTestApp.Shared
 {
     public class Data
     {

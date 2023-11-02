@@ -5,7 +5,7 @@ using BlazorStrap;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
-namespace MagstimEMGTestApp
+namespace BlazorTestApp
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

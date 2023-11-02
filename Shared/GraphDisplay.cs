@@ -1,4 +1,4 @@
-﻿namespace MagstimEMGTestApp.Shared
+﻿namespace BlazorTestApp.Shared
 {
     enum GraphDisplay
     {

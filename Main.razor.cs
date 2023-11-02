@@ -1,6 +1,5 @@
 ﻿using ApexCharts;
-using MagstimEMGTestApp.Shared;
-using Magstim.Emg.Mentalab;
+using BlazorTestApp.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -16,7 +15,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using BlazorStrap.V5;
 
-namespace MagstimEMGTestApp
+namespace BlazorTestApp
 {
     public partial class Main
     {
@@ -55,45 +54,45 @@ namespace MagstimEMGTestApp
         AnnotationsXAxis Time2Channel2Annotation;
 
 
-        public string Channel1UpperBound 
-        { 
-            get => _C1Upper; 
-            set 
-            { 
-                _C1Upper = value; 
-                RMSChannel1Bounded = CalulateRMS(ChartData, (int)Time1Channel1, (int)Time2Channel1, float.Parse(Channel1UpperBound), float.Parse(Channel1LowerBound)); 
-            } 
+        public string Channel1UpperBound
+        {
+            get => _C1Upper;
+            set
+            {
+                _C1Upper = value;
+                RMSChannel1Bounded = CalulateRMS(ChartData, (int)Time1Channel1, (int)Time2Channel1, float.Parse(Channel1UpperBound), float.Parse(Channel1LowerBound));
+            }
         }
-        public string Channel1LowerBound 
-        { 
-            get => _C1Lower; 
-            set 
-            { 
+        public string Channel1LowerBound
+        {
+            get => _C1Lower;
+            set
+            {
                 _C1Lower = value;
                 RMSChannel1Bounded = CalulateRMS(ChartData, (int)Time1Channel1, (int)Time2Channel1, float.Parse(Channel1UpperBound), float.Parse(Channel1LowerBound));
-            } 
+            }
         }
-        public string Channel2UpperBound 
-        { 
-            get => _C2Upper; 
-            set 
-            { 
-                _C2Upper = value; 
-                RMSChannel2Bounded = CalulateRMS(ChartData2,(int)Time1Channel2,(int)Time2Channel2, float.Parse(Channel2UpperBound), float.Parse(Channel2LowerBound)); 
-            } 
+        public string Channel2UpperBound
+        {
+            get => _C2Upper;
+            set
+            {
+                _C2Upper = value;
+                RMSChannel2Bounded = CalulateRMS(ChartData2, (int)Time1Channel2, (int)Time2Channel2, float.Parse(Channel2UpperBound), float.Parse(Channel2LowerBound));
+            }
         }
-        public string Channel2LowerBound 
-        { 
-            get => _C2Lower; 
-            set 
-            { 
+        public string Channel2LowerBound
+        {
+            get => _C2Lower;
+            set
+            {
                 _C2Lower = value;
                 RMSChannel2Bounded = CalulateRMS(ChartData2, (int)Time1Channel2, (int)Time2Channel2, float.Parse(Channel2UpperBound), float.Parse(Channel2LowerBound));
-            } 
+            }
         }
         public void ToggleDebugData()
         {
-            DebugEnabled= !DebugEnabled;
+            DebugEnabled = !DebugEnabled;
             StateHasChanged();
         }
         public float CalulateRMS(List<Data> Data, int startIndex, int endIndex)
@@ -105,9 +104,9 @@ namespace MagstimEMGTestApp
                 var newData = Data[i].yValue;
                 DCOffset.Add(newData);
             }
-            var DCoffsetValue = (float)DCOffset.Average(); 
+            var DCoffsetValue = (float)DCOffset.Average();
 
-            for (int i = (int)startIndex; i < endIndex; i++) 
+            for (int i = (int)startIndex; i < endIndex; i++)
             {
                 var newData = Data[i].yValue - DCoffsetValue;
                 Squares.Add(Math.Pow(newData, 2)); // Square of the value
@@ -118,16 +117,16 @@ namespace MagstimEMGTestApp
             return rms;
         }
 
-        public float CalulateRMS(List<Data> Data,int startIndex, int endIndex, float UpperBound, float lowerBound)
+        public float CalulateRMS(List<Data> Data, int startIndex, int endIndex, float UpperBound, float lowerBound)
         {
             List<double> Squares = new List<double>(); //List to hold New values
 
             for (int i = (int)startIndex; i < endIndex; i++) // loop that starts at the specified index, and ends when specifed
             {
                 var newData = Data[i].yValue;
-                if(newData < UpperBound && newData > lowerBound) // check to see whether the value is withing the range specifed 
+                if (newData < UpperBound && newData > lowerBound) // check to see whether the value is withing the range specifed 
                 {
-                Squares.Add(Math.Pow(newData, 2)); // Square of the value
+                    Squares.Add(Math.Pow(newData, 2)); // Square of the value
                 }
             }
             var Avg = Squares.Average(); //mean of all squares 
@@ -151,52 +150,52 @@ namespace MagstimEMGTestApp
         SineWaveDataGenerator generator = new SineWaveDataGenerator();
         public float Amp1Channel1 { get => _amp1Channel1; set { _amp1Channel1 = value; InvokeAsync(() => { StateHasChanged(); }); } }
         public float Amp1Channel2 { get => _amp1Channel2; set { _amp1Channel2 = value; InvokeAsync(() => { StateHasChanged(); }); } }
-        public float Time1Channel1 
-        { 
-            get => _time1Channel1; 
-            set 
-            { 
-                _time1Channel1 = value; 
-                if(value > Time2Channel1) Time2Channel1++;
+        public float Time1Channel1
+        {
+            get => _time1Channel1;
+            set
+            {
+                _time1Channel1 = value;
+                if (value > Time2Channel1) Time2Channel1++;
                 //RMSChannel1= CalulateRMS(ChartData, (int)Time1Channel1, (int)Time2Channel1);
-                InvokeAsync(() => { StateHasChanged(); }); 
-            } 
+                InvokeAsync(() => { StateHasChanged(); });
+            }
         }
-        public float Time2Channel1 
-        { 
-            get => _time2Channel1; 
-            set 
-            { 
-                _time2Channel1 = value; 
-                if(value< Time1Channel1) Time1Channel1--;
-                
-                InvokeAsync(() => { StateHasChanged(); }); 
-            } 
+        public float Time2Channel1
+        {
+            get => _time2Channel1;
+            set
+            {
+                _time2Channel1 = value;
+                if (value < Time1Channel1) Time1Channel1--;
+
+                InvokeAsync(() => { StateHasChanged(); });
+            }
         }
 
-        public float Time1Channel2 
-        { 
-            get => _time1Channel2; 
-            set 
-            { 
+        public float Time1Channel2
+        {
+            get => _time1Channel2;
+            set
+            {
                 _time1Channel2 = value;
                 if (value > Time2Channel2) Time2Channel2++;
                 //RMSChannel2 = CalulateRMS(ChartData2, (int)Time1Channel2, (int)Time2Channel2);
 
-                InvokeAsync(() => { StateHasChanged(); }); 
-            } 
+                InvokeAsync(() => { StateHasChanged(); });
+            }
         }
-        public float Time2Channel2 
-        { 
-            get => _time2Channel2; 
-            set 
-            { 
+        public float Time2Channel2
+        {
+            get => _time2Channel2;
+            set
+            {
                 _time2Channel2 = value;
                 if (value < Time1Channel2) Time1Channel2--;
-                
 
-                InvokeAsync(() => { StateHasChanged(); }); 
-            } 
+
+                InvokeAsync(() => { StateHasChanged(); });
+            }
         }
         public List<Data> ChartData { get => _ChartData; set { _ChartData = value; } }
         public List<Data> ChartData2 { get => _ChartData2; set { _ChartData2 = value; } }
@@ -204,7 +203,7 @@ namespace MagstimEMGTestApp
 
         int IndexOfAmp1Channel2;
 
-        
+
         AnnotationsYAxis ZeroLineChartOne = new AnnotationsYAxis
         {
             Id = "ZeroLine",
@@ -216,7 +215,7 @@ namespace MagstimEMGTestApp
                 Text = " "
             }
         };
-        AnnotationsYAxis ZeroLineChartTwo= new AnnotationsYAxis
+        AnnotationsYAxis ZeroLineChartTwo = new AnnotationsYAxis
         {
             Id = "ZeroLine",
             StrokeDashArray = 0,
@@ -236,50 +235,7 @@ namespace MagstimEMGTestApp
         {
             ChartOptionsChannel1 = ReturnChartOptions("1");
             ChartOptionsChannel2 = ReturnChartOptions("2");
-            try
-            {
-            ports = SerialPort.GetPortNames();
-            var ml = new MentaLab(ports[0]);
-            MentalabVersion = ml.GetVersion().Version;
-            
-            }
-            catch (Exception ex) 
-            {
-                MentalabVersion = "Please Select A COM port";
-            }
             await base.OnInitializedAsync();
-        }
-        public void SetSelectedPort(int index)
-        {
-            selectedPortIndex = index;
-            
-            GetMentaLabVersion();
-            
-        }
-
-        private void GetMentaLabVersion()
-        {
-            
-            var ml = new MentaLab(ports[selectedPortIndex]);
-            MentalabVersion = ml.GetVersion().Version;
-
-            //if (MentalabVersion == "\0\0\0\0\0\0\0\0\0\0\0\0\0\0")
-            //{
-            //    MentalabPresent = false;
-            //}
-            //else 
-            //{
-            //    MentalabPresent = true;
-            //}
-
-        }
-
-        public void RefreshPorts()
-        {
-            ports = SerialPort.GetPortNames();
-            selectedPortIndex = ports.Length == 0 ? -1 : 0;
-
-            StateHasChanged();
         }
         string GraphGridClass = "GraphGrid";
         string GraphOneHidden = "";
@@ -291,13 +247,13 @@ namespace MagstimEMGTestApp
             {
                 case GraphDisplay.Both:
                     GraphGridClass = "GraphGrid";
-                     GraphOneHidden = "";
-                     GraphTwoHidden = "";
+                    GraphOneHidden = "";
+                    GraphTwoHidden = "";
                     break;
                 case GraphDisplay.ChannelOne:
                     GraphGridClass = "GraphGridOne";
-                     GraphOneHidden = "";
-                     GraphTwoHidden = "Hidden";
+                    GraphOneHidden = "";
+                    GraphTwoHidden = "Hidden";
                     break;
                 case GraphDisplay.ChannelTwo:
                     GraphGridClass = "GraphGridTwo";
@@ -313,31 +269,10 @@ namespace MagstimEMGTestApp
         }
         public void GetData()
         {
-            if (DebugEnabled)
-            {
-                ChartData = generator.GenerateEMGSignal(2400, 1f);
-                ChartData2 = generator.GenerateEMGSignal(2400, 1f);
-            }
-            else
-            {
-            try
-            {
-                var ml = new MentaLab(ports[selectedPortIndex]);
-                var data1 = ml.GetChannelData(Channel.One);
-                var data2 = ml.GetChannelData(Channel.Two);
 
-                ChartData = data1.Select((d,i) => new Data(i,d * 1000)).ToList(); 
-                ChartData2 = data2.Select((d,i) => new Data(i,d * 1000)).ToList(); 
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            }
+            ChartData = generator.GenerateEMGSignal(2400, 1f);
+            ChartData2 = generator.GenerateEMGSignal(2400, 1f);
             Task.Run(async () => await RenderChart());
-            
-
-
             StateHasChanged();
         }
         public async Task RenderChart()
@@ -356,39 +291,39 @@ namespace MagstimEMGTestApp
         {
             //add option to add 100 to simulate starting when pulse is fired
             var value = index++ * 300d / 2400;
-            if (!zeroAtStart) value += 100; 
+            if (!zeroAtStart) value += 100;
             return value;
         }
         public async Task InitCursorsYCursors()
         {
-            if(ChartData.Count != 0)
+            if (ChartData.Count != 0)
             {
                 AmpOrderedData = (from v in ChartData orderby v.yValue descending select v.yValue).ToList();
                 Amp2OrderedData = (from v in ChartData2 orderby v.yValue descending select v.yValue).ToList();
 
                 IndexOfAmp1Channel1 = 0;
-                
+
                 IndexOfAmp1Channel2 = 0;
-                
+
 
                 Amp1Channel1 = (float)Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 5, MidpointRounding.AwayFromZero);
-                
-                Amp1Channel2 = (float)Math.Round(Amp2OrderedData[IndexOfAmp1Channel2], 5, MidpointRounding.AwayFromZero);
-                
-                Amp1Channel1Annotation = NewAnnotationYAxis("Channel1Amp1", Math.Round(AmpOrderedData[IndexOfAmp1Channel1],2,MidpointRounding.AwayFromZero), "Amp 1");
 
-                
+                Amp1Channel2 = (float)Math.Round(Amp2OrderedData[IndexOfAmp1Channel2], 5, MidpointRounding.AwayFromZero);
+
+                Amp1Channel1Annotation = NewAnnotationYAxis("Channel1Amp1", Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 2, MidpointRounding.AwayFromZero), "Amp 1");
+
+
                 Amp1Channel2Annotation = NewAnnotationYAxis("Channel2Amp1", Math.Round(Amp2OrderedData[IndexOfAmp1Channel2], 5, MidpointRounding.AwayFromZero), "Amp 1");
-                
+
                 await Chart.AddYAxisAnnotationAsync(Amp1Channel1Annotation, false);
-                
+
                 await Chart2.AddYAxisAnnotationAsync(Amp1Channel2Annotation, false);
-                
+
             }
         }
         public async Task InitCursorsXCursors()
         {
-            if(ChartData.Count != 0)
+            if (ChartData.Count != 0)
             {
                 int startIndex = 800;
                 int endIndex = (ChartData.Count / 4) * 3;
@@ -397,7 +332,7 @@ namespace MagstimEMGTestApp
                 Time2Channel1Annotation = NewAnnotationXAxis("Channel1Time2", endIndex, "T2");
                 Time1Channel2Annotation = NewAnnotationXAxis("Channel2Time1", startIndex, "T1");
                 Time2Channel2Annotation = NewAnnotationXAxis("Channel2Time2", endIndex, "T2");
-                
+
                 Time1Channel1 = startIndex;
                 Time2Channel1 = endIndex;
                 Time1Channel2 = startIndex;
@@ -422,14 +357,14 @@ namespace MagstimEMGTestApp
                     await Chart.RemoveAnnotationAsync("Channel1Time2");
 
                     Time1Channel1 += AdjustAmount;
-                    Time1Channel1 = Math.Clamp(Time1Channel1, 0, ChartData.Count-1);
+                    Time1Channel1 = Math.Clamp(Time1Channel1, 0, ChartData.Count - 1);
                     Time1Channel1Annotation = NewAnnotationXAxis("Channel1Time1", (int)Time1Channel1, "T1");
                     Time2Channel1Annotation = NewAnnotationXAxis("Channel1Time2", (int)Time2Channel1, "T2");
 
                     await Chart.AddXAxisAnnotationAsync(Time1Channel1Annotation, false);
                     await Chart.AddXAxisAnnotationAsync(Time2Channel1Annotation, false);
 
-                    break; 
+                    break;
                 case Channels.Time2Channel1:
                     await Chart.RemoveAnnotationAsync("Channel1Time1");
                     await Chart.RemoveAnnotationAsync("Channel1Time2");
@@ -469,7 +404,7 @@ namespace MagstimEMGTestApp
                 case Channels.Amp1Channel1:
                     await Chart.RemoveAnnotationAsync("Channel1Amp1");
                     IndexOfAmp1Channel1 += AdjustAmount;
-                    IndexOfAmp1Channel1 = Math.Clamp(IndexOfAmp1Channel1, 0,ChartData.Count - 1);
+                    IndexOfAmp1Channel1 = Math.Clamp(IndexOfAmp1Channel1, 0, ChartData.Count - 1);
                     Amp1Channel1 = (float)Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 5, MidpointRounding.AwayFromZero);
                     Amp1Channel1Annotation = NewAnnotationYAxis("Channel1Amp1", Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 2, MidpointRounding.AwayFromZero), "Amp 1");
                     await Chart.AddYAxisAnnotationAsync(Amp1Channel1Annotation, false);
@@ -497,8 +432,8 @@ namespace MagstimEMGTestApp
             await Chart.RemoveAnnotationAsync("Channel1Time1");
             await Chart.RemoveAnnotationAsync("Channel1Time2");
 
-            
-            
+
+
             Time1Channel1Annotation = NewAnnotationXAxis("Channel1Time1", (int)Time1Channel1, "T1");
             Time2Channel1Annotation = NewAnnotationXAxis("Channel1Time2", (int)Time2Channel1, "T2");
 
@@ -515,14 +450,14 @@ namespace MagstimEMGTestApp
             await Chart2.AddXAxisAnnotationAsync(Time2Channel2Annotation, false);
 
             await Chart.RemoveAnnotationAsync("Channel1Amp1");
-            
-            
+
+
             Amp1Channel1 = (float)Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 5, MidpointRounding.AwayFromZero);
             Amp1Channel1Annotation = NewAnnotationYAxis("Channel1Amp1", Math.Round(AmpOrderedData[IndexOfAmp1Channel1], 2, MidpointRounding.AwayFromZero), "Amp 1");
             await Chart.AddYAxisAnnotationAsync(Amp1Channel1Annotation, false);
 
             await Chart2.RemoveAnnotationAsync("Channel2Amp1");
-            
+
             Amp1Channel2 = (float)Math.Round(AmpOrderedData[IndexOfAmp1Channel2], 5, MidpointRounding.AwayFromZero);
             Amp1Channel2Annotation = NewAnnotationYAxis("Channel2Amp1", Math.Round(AmpOrderedData[IndexOfAmp1Channel2], 2, MidpointRounding.AwayFromZero), "Amp 1");
             await Chart2.AddYAxisAnnotationAsync(Amp1Channel2Annotation, false);
@@ -569,7 +504,7 @@ namespace MagstimEMGTestApp
                 TickAmount = 2,
                 Labels = new YAxisLabels { Style = new AxisLabelStyle { Colors = new ApexCharts.Color("white") } },
                 ForceNiceScale = true,
-                DecimalsInFloat = 10 
+                DecimalsInFloat = 10
             });
             return apexChartOptions;
 
@@ -619,7 +554,7 @@ namespace MagstimEMGTestApp
                 WriteToCsv(ChartData, exportlocation + @"\" + DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + "_EMGDataExportChannel1.csv");
                 WriteToCsv(ChartData2, exportlocation + @"\" + DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + "_EMGDataExportChannel2.csv");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
@@ -638,14 +573,14 @@ namespace MagstimEMGTestApp
             {
                 return "none";
             }
-            if(selectedPortIndex >= 0)
+            if (selectedPortIndex >= 0)
             {
                 return ports[selectedPortIndex];
             }
             return "unknown";
         }
         BSModal? modal1 = new();
-        string modalMsg ="\0\0\0\0\0";
+        string modalMsg = "\0\0\0\0\0";
         private void ShowHelpWindow()
         {
             modal1.ShowAsync();

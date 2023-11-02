@@ -1,7 +1,7 @@
-﻿<Application x:Class="MagstimEMGTestApp.App"
+﻿<Application x:Class="BlazorTestApp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:MagstimEMGTestApp"
+             xmlns:local="clr-namespace:BlazorTestApp"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          

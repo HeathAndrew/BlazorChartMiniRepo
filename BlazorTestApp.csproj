@@ -5,19 +5,16 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-	<RootNamespace>MagstimEMGTestApp</RootNamespace>
+	<RootNamespace>BlazorTestApp</RootNamespace>
 	<Version>1.2.0</Version>
 	  <PublishSingleFile>true</PublishSingleFile>
 	  <SelfContained>true</SelfContained> 
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Blazor-ApexCharts" Version="1.2.1" />
+    <PackageReference Include="Blazor-ApexCharts" Version="1.3.0" />
     <PackageReference Include="BlazorStrap" Version="5.1.102.51923" />
     <PackageReference Include="BlazorStrap.V5" Version="5.1.102.51723" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
-    <PackageReference Include="Magstim.Emg" Version="1.1.0" />
-    <PackageReference Include="Magstim.Emg.Filter" Version="1.1.0" />
-    <PackageReference Include="Magstim.Emg.Mentalab" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="6.0.540" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
